@@ -20,7 +20,7 @@ services:
       - MAX_TOTAL_CONTEXT_CHARS=32000
       - MAX_FILES_PER_REQUEST=20
     volumes:
-      - C:/Users/rishi/mcp-ollama-docker:/workspace
+      - ./:/workspace
     depends_on:
       - ollama
 

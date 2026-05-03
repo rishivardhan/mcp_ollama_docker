@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 from datetime import datetime
 import json
-from app.config import WORKSPACE, DANGEROUS_PATHS, IGNORED_FOLDERS
+from app.config import WORKSPACE, DANGEROUS_PATHS, IGNORED_FOLDERS, BACKUP_DIR, LOG_DIR
 
 def safe_path(relative_path: str) -> Path:
     """Convert relative path to absolute, ensuring it stays within WORKSPACE."""
@@ -42,7 +42,7 @@ def is_binary_file(path: Path) -> bool:
 
 def create_backup(file_path: Path) -> Path:
     """Create a backup of the file."""
-    backup_dir = WORKSPACE / ".backups" / datetime.now().strftime("%Y%m%d-%H%M%S")
+    backup_dir = WORKSPACE / BACKUP_DIR / datetime.now().strftime("%Y%m%d-%H%M%S")
     backup_dir.mkdir(parents=True, exist_ok=True)
 
     relative_path = file_path.relative_to(WORKSPACE)
@@ -56,7 +56,7 @@ def create_backup(file_path: Path) -> Path:
 
 def log_edit(operation: str, file_path: str, details: dict = None):
     """Log an edit operation."""
-    log_dir = WORKSPACE / ".agent_logs"
+    log_dir = WORKSPACE / LOG_DIR
     log_dir.mkdir(exist_ok=True)
 
     log_entry = {

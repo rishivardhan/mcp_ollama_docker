@@ -240,7 +240,8 @@ def delete_file(file_path: str, force: bool = False) -> Dict[str, Any]:
             return {"success": True, "message": "File permanently deleted"}
         else:
             # Move to trash
-            trash_dir = WORKSPACE / ".trash"
+            from app.config import TRASH_DIR
+            trash_dir = WORKSPACE / TRASH_DIR
             trash_dir.mkdir(exist_ok=True)
 
             relative = path.relative_to(WORKSPACE)
@@ -263,12 +264,14 @@ def restore_backup(backup_path: str) -> Dict[str, Any]:
         if not backup.exists():
             return {"success": False, "error": "Backup does not exist"}
 
-        # Find original path (remove .backups/YYYYMMDD-HHMMSS/ prefix)
-        parts = backup.relative_to(WORKSPACE).parts
-        if len(parts) < 2 or parts[0] != ".backups":
+        # Find original path (remove backup directory and timestamp prefix)
+        backup_parts = backup.relative_to(WORKSPACE).parts
+        from app.config import BACKUP_DIR
+        prefix = BACKUP_DIR.parts
+        if len(backup_parts) <= len(prefix) or tuple(backup_parts[:len(prefix)]) != prefix:
             return {"success": False, "error": "Invalid backup path"}
 
-        original_relative = Path(*parts[2:])  # Skip .backups and timestamp
+        original_relative = Path(*backup_parts[len(prefix) + 1:])
         original_path = WORKSPACE / original_relative
 
         # Create backup of current file if it exists

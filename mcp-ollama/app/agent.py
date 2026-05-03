@@ -1,15 +1,13 @@
 from typing import List, Dict, Any, Optional
+from app.config import DEFAULT_TARGET_FILES
 from app.file_tools import read_file
 from app.ollama_client import propose_edits
-from app.safety import safe_path
-from pathlib import Path
 
 async def agent_edit(instruction: str, target_files: Optional[List[str]] = None, dry_run: bool = True) -> Dict[str, Any]:
     """AI-driven edit proposal and execution."""
     try:
         # Determine which files to examine
         if not target_files:
-            # Auto-detect relevant files based on instruction
             target_files = await _detect_relevant_files(instruction)
 
         # Read target files
@@ -53,25 +51,14 @@ async def agent_edit(instruction: str, target_files: Optional[List[str]] = None,
 async def _detect_relevant_files(instruction: str) -> List[str]:
     """Detect which files are relevant to the instruction."""
     # Simple heuristic - in a real implementation, you might use AI for this
-    keywords = instruction.lower().split()
-    relevant_files = []
+    return DEFAULT_TARGET_FILES
 
-    # Common file patterns
-    patterns = {
-        "python": ["*.py"],
-        "javascript": ["*.js", "*.ts", "*.jsx", "*.tsx"],
-        "config": ["*.json", "*.yaml", "*.yml", "Dockerfile", "*.toml"],
-        "docs": ["*.md", "README*"]
-    }
-
-    # This is a simplified version - you'd want more sophisticated detection
-    return ["server.py", "requirements.txt", "Dockerfile"]  # Default fallback
 
 def _assess_risks(instruction: str, target_files: List[str]) -> List[str]:
     """Assess potential risks of the changes."""
     risks = []
 
-    if any("delete" in instruction.lower() for instruction in [instruction]):
+    if "delete" in instruction.lower():
         risks.append("Instruction mentions deletion - ensure backups are created")
 
     if len(target_files) > 5:
